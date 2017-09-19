@@ -1522,10 +1522,13 @@
             $('img[data-lazy]', imagesScope).each(function() {
 
                 var image = $(this),
-                    imageSource = $(this).attr('data-lazy'),
-                    imageSrcSet = $(this).attr('data-srcset'),
-                    imageSizes  = $(this).attr('data-sizes') || _.$slider.attr('data-sizes'),
-                    imageToLoad = document.createElement('img');
+                    imageSource = image.attr('data-lazy'),
+                    imageSrcSet = image.attr('data-srcset'),
+                    imageSizes  = image.attr('data-sizes') || _.$slider.attr('data-sizes'),
+                    imageRetina = image.attr('data-src-retina'),
+                    imageToLoad = document.createElement('img'),
+                    isRetina = window.devicePixelRatio > 1,
+                    imgSrc = isRetina ? imageRetina : imageSource;
 
                 imageToLoad.onload = function() {
 
@@ -1543,13 +1546,13 @@
                             }
 
                             image
-                                .attr('src', imageSource)
+                                .attr('src', imgSrc)
                                 .animate({ opacity: 1 }, 200, function() {
                                     image
-                                        .removeAttr('data-lazy data-srcset data-sizes')
+                                        .removeAttr('data-lazy data-srcset data-sizes data-src-retina')
                                         .removeClass('slick-loading');
                                 });
-                            _.$slider.trigger('lazyLoaded', [_, image, imageSource]);
+                            _.$slider.trigger('lazyLoaded', [_, image, imgSrc]);
                         });
 
                 };
@@ -1743,7 +1746,10 @@
             imageSource,
             imageSrcSet,
             imageSizes,
-            imageToLoad;
+            imageRetina,
+            imageToLoad,
+            isRetina,
+            imgSrc;
 
         if ( $imgsToLoad.length ) {
 
@@ -1751,7 +1757,11 @@
             imageSource = image.attr('data-lazy');
             imageSrcSet = image.attr('data-srcset');
             imageSizes  = image.attr('data-sizes') || _.$slider.attr('data-sizes');
+            imageRetina = image.attr('data-src-retina');
             imageToLoad = document.createElement('img');
+            isRetina = window.devicePixelRatio > 1;
+            imgSrc = isRetina ? imageRetina : imageSource;
+
 
             imageToLoad.onload = function() {
 
@@ -1766,15 +1776,15 @@
                 }
 
                 image
-                    .attr( 'src', imageSource )
-                    .removeAttr('data-lazy data-srcset data-sizes')
+                    .attr( 'src', imgSrc )
+                    .removeAttr('data-lazy data-srcset data-sizes data-src-retina')
                     .removeClass('slick-loading');
 
                 if ( _.options.adaptiveHeight === true ) {
                     _.setPosition();
                 }
 
-                _.$slider.trigger('lazyLoaded', [ _, image, imageSource ]);
+                _.$slider.trigger('lazyLoaded', [ _, image, imgSrc ]);
                 _.progressiveLazyLoad();
 
             };
